@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -o xtrace
 
 PR_NUMBER=$(jq -r ".issue.number" "$GITHUB_EVENT_PATH")
 echo "Collecting information about PR #$PR_NUMBER of $GITHUB_REPOSITORY..."
@@ -53,16 +54,26 @@ HEAD_BRANCH=$(echo "$pr_resp" | jq -r .head.ref)
 
 echo "Base branch for PR #$PR_NUMBER is $BASE_BRANCH"
 
+echo "HEAD_REPO = $HEAD_REPO"
+echo "HEAD_BRANCH = $HEAD_BRANCH"
+echo "GITHUB_REPOSITORY = $GITHUB_REPOSITORY"
+
 USER_TOKEN=${USER_LOGIN//-/_}_TOKEN
 COMMITTER_TOKEN=${!USER_TOKEN:-$GITHUB_TOKEN}
+
+git remote
+
+echo "https://x-access-token:$COMMITTER_TOKEN@github.com/$GITHUB_REPOSITORY.git"
 
 git remote set-url origin https://x-access-token:$COMMITTER_TOKEN@github.com/$GITHUB_REPOSITORY.git
 git config --global user.email "$USER_EMAIL"
 git config --global user.name "$USER_NAME"
 
+echo "https://x-access-token:$COMMITTER_TOKEN@github.com/$HEAD_REPO.git"
+
 git remote add fork https://x-access-token:$COMMITTER_TOKEN@github.com/$HEAD_REPO.git
 
-set -o xtrace
+
 
 # make sure branches are up-to-date
 git fetch origin $BASE_BRANCH
