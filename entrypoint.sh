@@ -61,6 +61,8 @@ echo "GITHUB_REPOSITORY = $GITHUB_REPOSITORY"
 USER_TOKEN=${USER_LOGIN//-/_}_TOKEN
 COMMITTER_TOKEN=${!USER_TOKEN:-$GITHUB_TOKEN}
 
+COMMITTER_TOKEN="$(echo -e "${COMMITTER_TOKEN}" | tr -d '[:space:]')"
+
 git remote
 
 echo "https://x-access-token:$COMMITTER_TOKEN@github.com/$GITHUB_REPOSITORY.git"
