@@ -19,7 +19,7 @@ AUTH_HEADER="Authorization: token $GITHUB_TOKEN"
 curl -X DELETE -s \
   -H "${AUTH_HEADER}" \
   -H "${API_HEADER}" \
-  "${URI}/repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels/need-rebase"
+  "${URI}/repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels/needs-rebase"
 
 pr_resp=$(curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
