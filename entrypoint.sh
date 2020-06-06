@@ -4,6 +4,8 @@ set -e
 set -o xtrace
 
 PR_NUMBER=$(jq -r ".issue.number" "$GITHUB_EVENT_PATH")
+COMMENT_NUMBER=$(jq -r ".comment.id" "$GITHUB_EVENT_PATH")
+
 echo "Collecting information about PR #$PR_NUMBER of $GITHUB_REPOSITORY..."
 
 if [[ -z "$GITHUB_TOKEN" ]]; then
@@ -14,6 +16,12 @@ fi
 URI=https://api.github.com
 API_HEADER="Accept: application/vnd.github.v3+json"
 AUTH_HEADER="Authorization: token $GITHUB_TOKEN"
+
+curl -X POST -s -H "${AUTH_HEADER}" \
+          -H "Accept: application/vnd.github.squirrel-girl-preview+json" \
+          -H "Content-Type: application/json" \
+          "${URI}/repos/$GITHUB_REPOSITORY/comments/$COMMENT_NUMBER/reactions" \
+          -d '{"content": "heart"}}'
 
 pr_resp=$(curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
