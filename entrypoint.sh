@@ -4,7 +4,6 @@ set -e
 set -o xtrace
 
 PR_NUMBER=$(jq -r ".issue.number" "$GITHUB_EVENT_PATH")
-COMMENT_NUMBER=$(jq -r ".comment.id" "$GITHUB_EVENT_PATH")
 
 echo "Collecting information about PR #$PR_NUMBER of $GITHUB_REPOSITORY..."
 
@@ -17,11 +16,10 @@ URI=https://api.github.com
 API_HEADER="Accept: application/vnd.github.v3+json"
 AUTH_HEADER="Authorization: token $GITHUB_TOKEN"
 
-curl -X POST -s -H "${AUTH_HEADER}" \
-          -H "Accept: application/vnd.github.squirrel-girl-preview+json" \
-          -H "Content-Type: application/json" \
-          "${URI}/repos/$GITHUB_REPOSITORY/issues/comments/$COMMENT_NUMBER/reactions" \
-          -d '{"content": "eyes"}'
+curl -X DELETE -s \
+  -H "${AUTH_HEADER}" \
+  -H "${API_HEADER}" \
+  "${URI}/repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels/need-rebase"
 
 pr_resp=$(curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
@@ -48,6 +46,13 @@ fi
 if [[ "$(echo "$pr_resp" | jq -r .rebaseable)" != "true" ]]; then
 	echo "GitHub doesn't think that the PR is rebaseable!"
 	echo "API response: $pr_resp"
+
+  curl -X POST -s \
+    -H "${AUTH_HEADER}" \
+    -H "Content-Type: application/json" \
+    "${URI}/repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels" \
+    -d '{"labels": ["need-manual-rebase"]}'
+
 	exit 1
 fi
 
