@@ -2,7 +2,7 @@
 
 set -e
 
-PR_NUMBER=$(jq -r ".issue.number" "$GITHUB_EVENT_PATH")
+PR_NUMBER=$(jq -r ".number" "$GITHUB_EVENT_PATH")
 echo "Collecting information about PR #$PR_NUMBER of $GITHUB_REPOSITORY..."
 
 if [[ -z "$GITHUB_TOKEN" ]]; then
@@ -14,13 +14,18 @@ URI=https://api.github.com
 API_HEADER="Accept: application/vnd.github.v3+json"
 AUTH_HEADER="Authorization: token $GITHUB_TOKEN"
 
+curl -X DELETE -s \
+  -H "${AUTH_HEADER}" \
+  -H "${API_HEADER}" \
+  "${URI}/repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels/needs-rebase"
+
 pr_resp=$(curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
 
 BASE_REPO=$(echo "$pr_resp" | jq -r .base.repo.full_name)
 BASE_BRANCH=$(echo "$pr_resp" | jq -r .base.ref)
 
-USER_LOGIN=$(jq -r ".comment.user.login" "$GITHUB_EVENT_PATH")
+USER_LOGIN=$(jq -r ".sender.login" "$GITHUB_EVENT_PATH")
 
 user_resp=$(curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
             "${URI}/users/${USER_LOGIN}")
@@ -39,6 +44,13 @@ fi
 if [[ "$(echo "$pr_resp" | jq -r .rebaseable)" != "true" ]]; then
 	echo "GitHub doesn't think that the PR is rebaseable!"
 	echo "API response: $pr_resp"
+
+  curl -X POST -s \
+    -H "${AUTH_HEADER}" \
+    -H "Content-Type: application/json" \
+    "${URI}/repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels" \
+    -d '{"labels": ["needs-manual-rebase"]}'
+
 	exit 1
 fi
 
