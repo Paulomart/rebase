@@ -20,8 +20,8 @@ AUTH_HEADER="Authorization: token $GITHUB_TOKEN"
 curl -X POST -s -H "${AUTH_HEADER}" \
           -H "Accept: application/vnd.github.squirrel-girl-preview+json" \
           -H "Content-Type: application/json" \
-          "${URI}/repos/$GITHUB_REPOSITORY/comments/$COMMENT_NUMBER/reactions" \
-          -d '{"content": "heart"}}'
+          "${URI}/repos/$GITHUB_REPOSITORY/issues/comments/$COMMENT_NUMBER/reactions" \
+          -d '{"content": "eyes"}}'
 
 pr_resp=$(curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
