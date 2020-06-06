@@ -51,7 +51,7 @@ if [[ "$(echo "$pr_resp" | jq -r .rebaseable)" != "true" ]]; then
     -H "${AUTH_HEADER}" \
     -H "Content-Type: application/json" \
     "${URI}/repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels" \
-    -d '{"labels": ["need-manual-rebase"]}'
+    -d '{"labels": ["needs-manual-rebase"]}'
 
 	exit 1
 fi
