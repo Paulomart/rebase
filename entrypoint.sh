@@ -44,13 +44,6 @@ fi
 if [[ "$(echo "$pr_resp" | jq -r .rebaseable)" != "true" ]]; then
 	echo "GitHub doesn't think that the PR is rebaseable!"
 	echo "API response: $pr_resp"
-
-  curl -X POST -s \
-    -H "${AUTH_HEADER}" \
-    -H "Content-Type: application/json" \
-    "${URI}/repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels" \
-    -d '{"labels": ["needs-manual-rebase"]}'
-
 	exit 1
 fi
 
